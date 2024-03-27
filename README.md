@@ -16,4 +16,4 @@ The source file [trained.R](https://github.com/brucewent/MAD/blob/main/trained.R
   
 ### License	
 
-See the [LICENSE]((https://github.com/brucewent/MAD/blob/main/LICENSE) file for license rights and limitations (MIT).
+See the [LICENSE](https://github.com/brucewent/MAD/blob/main/LICENSE) file for license rights and limitations (MIT).
