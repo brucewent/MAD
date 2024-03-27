@@ -2,8 +2,7 @@
 library(tidyverse)
 library(openxlsx)
 library(janitor)
-# library(skimr)
-# library(gt)
+library(gt)
 
 poslist <- c("Cubmaster",
              "Assistant Cubmaster",
@@ -195,6 +194,16 @@ freezePane(wb, sheet = 3, firstRow = TRUE)
 addFilter(wb, sheet = 3, row = 1, cols = 1:ncol(leader))
 
 saveWorkbook(wb, "training.xlsx", overwrite=TRUE)
+
+# Format unit stats for HTML output
+
+unit_stats |>
+  select(Charter_Org, Unit, Leaders, Trained, Train_pct,
+         DC_Leaders, DC_Trained, DC_Train_pct) |>
+  arrange(by=Train_pct) |>
+  gt()|>
+  fmt_number(columns=c(Train_pct, DC_Train_pct),
+             decimals = 1)
 
 # The Tidyverse Cookbook - Transform Tables
 # https://rstudio-education.github.io/tidyverse-cookbook/transform-tables.html
