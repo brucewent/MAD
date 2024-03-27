@@ -1,8 +1,12 @@
 
+# trained.R
+
 library(tidyverse)
 library(openxlsx)
 library(janitor)
 library(gt)
+
+# List of adult leadership positions in logical order
 
 poslist <- c("Cubmaster",
              "Assistant Cubmaster",
@@ -38,6 +42,8 @@ poslist <- c("Cubmaster",
              "Nova Counselor",
              "Supernova Mentor")
 
+# read the Trained Leaders Status data (CSV Details)
+
 position <- read_csv('data/TrainedLeader_Mercer_Area_District 2024-03-20.csv',
                      skip=8,
                      col_names=TRUE,
@@ -67,8 +73,10 @@ position <- read_csv('data/TrainedLeader_Mercer_Area_District 2024-03-20.csv',
   rename(Unit = Unit_Gender) |>
   arrange(Council, District, Unit, Position)
 
-# Position factor still includes all values
+# Check that position factor still includes all values found
 nrow(filter(position,is.na(Position))) == 0
+
+# Read the YPT Aging Report data (Export to CSV)
 
 protection <- read_csv('data/YPT_Mercer_Area_District 2024-03-20.csv',
                     skip=7,
@@ -81,8 +89,8 @@ protection <- read_csv('data/YPT_Mercer_Area_District 2024-03-20.csv',
                                    Registration_Date=col_date(format="%m/%d/%Y"))) |>
   rename(District = "..District")
 
-glimpse(position)
-glimpse(protection)
+# Create a list of distinct active leaders from the YPT data
+# leader is the enhanced version of YPT
 
 leader <- protection |>
   filter(is.na(Y01_Completed)==FALSE) |>
@@ -102,8 +110,11 @@ leader <- protection |>
   rename(Y01_Status = Status) |>
   arrange(Last_Name, First_Name, Middle_Name, Member_ID)
 
-# Member_ID still works as unique identifyer
+# Check that member_ID still works as unique identifyer
 nrow(leader) == nrow(distinct(leader,Member_ID))
+
+# bring in identifying info from YPT to each position
+# training is the enhanced version of pposition
 
 training <- position |>
   select (Council,
@@ -146,10 +157,12 @@ training <- position |>
          Email_Address,
          Phone_Number)
 
-# Training record count still the same?
+# Check that training record count still the same?
 nrow(position) == nrow(training)
 
-# Unit training statistics
+# Summarize unit training statistics
+# counts are distinct people as you can hold only 
+# one position in a given unit
 
 unit_1 <- training |>
   filter(!is.na(Unit)) |>
@@ -175,6 +188,8 @@ unit_stats <- merge(unit_1, unit_2, by.x="Unit", by.y="Unit") |>
   select(Council, District, Charter_Org, Unit,
          Leaders, Trained, Train_pct,
          DC_Leaders, DC_Trained, DC_Train_pct)
+
+# Create a spreadsheet with three sheets (Units, Training, Leaders) 
 
 wb <- createWorkbook()
 
@@ -204,37 +219,3 @@ unit_stats |>
   gt()|>
   fmt_number(columns=c(Train_pct, DC_Train_pct),
              decimals = 1)
-
-# The Tidyverse Cookbook - Transform Tables
-# https://rstudio-education.github.io/tidyverse-cookbook/transform-tables.html
-
-t_list <- training |>
-  mutate (row_lab = paste(Unit, Charter_Org, sep="/"),
-          Name=case_when(is.na(Middle_Name)==TRUE ~ paste(First_Name, Last_Name, sep=" "),
-                         TRUE ~ paste(First_Name, Middle_Name, Last_Name, sep=" "))) |>
-  filter (row_lab != "NA/NA")
-
-t_head <- t_list |>
-  select (row_lab) |>
-  distinct()
-
-row_lab <- t_head$row_lab
-
-t_list <- t_list |>
-  select(row_lab,
-         Name,
-         Member_ID,
-         Position,
-         Direct_Contact,
-         Trained,
-         Registration_Expiration,
-         Incomplete_Mandatory,
-         Incomplete_Classroom,
-         Incomplete_Online) |>
-  filter(Trained == "NO")
-
-t_gt <- t_list |>
-  gt(rowname_col = "row_lab") |>
-  tab_row_group(label = row_lab,
-                rows = Name, Member_ID)
-t_gt
