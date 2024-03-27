@@ -11,9 +11,11 @@ The source file [trained.R](https://github.com/brucewent/MAD/blob/main/trained.R
 * Summarize unit leader training counts
 * Write a spreadsheet with three sheets:
   * Units - the unit summary
-  * Trained - registered positions
-  * Leader - distinct adult leaders with youth protection training status
+  * Trained - registered positions and position-specific training status
+  * Leader - distinct adult leaders and youth protection training status
   
+The source file [Training Trends.R](https://github.com/brucewent/MAD/blob/main/Training%20Trends.R) is an earlier effort to track district-wide Trained Leaders & YPT taken from the Training Manager dashboard on a monthly basis.
+
 ### License	
 
 See the [LICENSE](https://github.com/brucewent/MAD/blob/main/LICENSE) file for license rights and limitations (MIT).
