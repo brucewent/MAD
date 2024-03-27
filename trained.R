@@ -2,8 +2,8 @@
 library(tidyverse)
 library(openxlsx)
 library(janitor)
-library(skimr)
-library(gt)
+# library(skimr)
+# library(gt)
 
 poslist <- c("Cubmaster",
              "Assistant Cubmaster",
@@ -150,23 +150,6 @@ training <- position |>
 # Training record count still the same?
 nrow(position) == nrow(training)
 
-glimpse(training)
-glimpse(leader)
-
-wb <- createWorkbook()
-
-addWorksheet(wb, "Training")
-writeData(wb, "Training", training)
-freezePane(wb, sheet = 1, firstRow = TRUE)
-addFilter(wb, sheet = 1, row = 1, cols = 1:ncol(training))
-
-addWorksheet(wb, "Leaders")
-writeData(wb, "Leaders", leader)
-freezePane(wb, sheet = 2, firstRow = TRUE)
-addFilter(wb, sheet = 2, row = 1, cols = 1:ncol(leader))
-
-saveWorkbook(wb, "training.xlsx", overwrite=TRUE)
-
 # Unit training statistics
 
 unit_1 <- training |>
@@ -174,21 +157,44 @@ unit_1 <- training |>
   select(Council, District, Charter_Org, Unit) |>
   distinct()
 
+unit_2 <- training |>
+  filter(!is.na(Unit)) |>
+  tabyl(Unit, Trained) |>
+  mutate(Leaders=YES+NO, Train_pct=100*YES/(YES+NO)) |>
+  rename(Trained=YES) |>
+  select(Unit, Leaders, Trained, Train_pct)
 
-unit_stats_direct <- training |>
+unit_3 <- training |>
   filter(Direct_Contact == "YES") |>
-  tabyl(Direct_Contact, Trained) |>
-  adorn_totals()
+  tabyl(Unit, Trained) |>
+  mutate(DC_Leaders=YES+NO, DC_Train_pct=100*YES/(YES+NO)) |>
+  rename(DC_Trained=YES) |>
+  select(Unit, DC_Leaders, DC_Trained, DC_Train_pct)
 
-us1 <- tibble(unit_stats[1])
+unit_stats <- merge(unit_1, unit_2, by.x="Unit", by.y="Unit") |>
+  merge(unit_3, by.x="Unit", by.y="Unit") |>
+  select(Council, District, Charter_Org, Unit,
+         Leaders, Trained, Train_pct,
+         DC_Leaders, DC_Trained, DC_Train_pct)
 
-  mutate(Leaders = YES.NO + YES.YES + NO.NO + NO.YES,
-         Direct_Contact = YES.YES + NO.YES)
-group_by(Council, District, Unit, Charter_Org)
-nest()
-tabyl()
-skim()
-summarize()
+wb <- createWorkbook()
+
+addWorksheet(wb, "Units")
+writeData(wb, "Units", unit_stats)
+freezePane(wb, sheet = 1, firstRow = TRUE)
+addFilter(wb, sheet = 1, row = 1, cols = 1:ncol(unit_stats))
+
+addWorksheet(wb, "Training")
+writeData(wb, "Training", training)
+freezePane(wb, sheet = 2, firstRow = TRUE)
+addFilter(wb, sheet = 2, row = 1, cols = 1:ncol(training))
+
+addWorksheet(wb, "Leaders")
+writeData(wb, "Leaders", leader)
+freezePane(wb, sheet = 3, firstRow = TRUE)
+addFilter(wb, sheet = 3, row = 1, cols = 1:ncol(leader))
+
+saveWorkbook(wb, "training.xlsx", overwrite=TRUE)
 
 # The Tidyverse Cookbook - Transform Tables
 # https://rstudio-education.github.io/tidyverse-cookbook/transform-tables.html
