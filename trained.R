@@ -1,5 +1,6 @@
 
 # trained.R
+# See https://github.com/brucewent/MAD/
 
 library(tidyverse)
 library(openxlsx)
@@ -44,7 +45,7 @@ poslist <- c("Cubmaster",
 
 # read the Trained Leaders Status data (CSV Details)
 
-position <- read_csv('data/TrainedLeader_Mercer_Area_District 2024-03-20.csv',
+position <- read_csv('data/TrainedLeader_Mercer_Area_District 2024-04-17.csv',
                      skip=8,
                      col_names=TRUE,
                      col_types=list(MemberID=col_integer(),
@@ -78,7 +79,7 @@ nrow(filter(position,is.na(Position))) == 0
 
 # Read the YPT Aging Report data (Export to CSV)
 
-protection <- read_csv('data/YPT_Mercer_Area_District 2024-03-20.csv',
+protection <- read_csv('data/YPT_Mercer_Area_District 2024-04-17.csv',
                     skip=7,
                     col_names=TRUE,
                     col_types=list(Member_ID=col_integer(),
@@ -161,8 +162,8 @@ training <- position |>
 nrow(position) == nrow(training)
 
 # Summarize unit training statistics
-# counts are distinct people as you can hold only 
-# one position in a given unit
+# counts are distinct people as you can hold only
+# one position in a given unit?
 
 unit_1 <- training |>
   filter(!is.na(Unit)) |>
@@ -189,7 +190,9 @@ unit_stats <- merge(unit_1, unit_2, by.x="Unit", by.y="Unit") |>
          Leaders, Trained, Train_pct,
          DC_Leaders, DC_Trained, DC_Train_pct)
 
-# Create a spreadsheet with three sheets (Units, Training, Leaders) 
+rm(unit_1, unit_2, unit_3)
+
+# Create a spreadsheet with three sheets (Units, Training, Leaders)
 
 wb <- createWorkbook()
 
