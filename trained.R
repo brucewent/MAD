@@ -45,7 +45,7 @@ poslist <- c("Cubmaster",
 
 # read the Trained Leaders Status data (CSV Details)
 
-position <- read_csv('data/TrainedLeader_Mercer_Area_District 2024-04-17.csv',
+position <- read_csv('data/TrainedLeader_Mercer_Area_District 2024-11-19.csv',
                      skip=8,
                      col_names=TRUE,
                      col_types=list(MemberID=col_integer(),
@@ -79,7 +79,7 @@ nrow(filter(position,is.na(Position))) == 0
 
 # Read the YPT Aging Report data (Export to CSV)
 
-protection <- read_csv('data/YPT_Mercer_Area_District 2024-04-17.csv',
+protection <- read_csv('data/YPT_Mercer_Area_District 2024-11-19.csv',
                     skip=7,
                     col_names=TRUE,
                     col_types=list(Member_ID=col_integer(),
@@ -115,7 +115,7 @@ leader <- protection |>
 nrow(leader) == nrow(distinct(leader,Member_ID))
 
 # bring in identifying info from YPT to each position
-# training is the enhanced version of pposition
+# training is the enhanced version of position
 
 training <- position |>
   select (Council,
@@ -222,3 +222,37 @@ unit_stats |>
   gt()|>
   fmt_number(columns=c(Train_pct, DC_Train_pct),
              decimals = 1)
+
+# Report training needs to unit
+
+key3 <- mutate(training,
+               posabbr = case_when(Position == "Cubmaster" ~ "CM",
+                                   Position == "Venturing Crew Advisor" ~ "Advisor",
+                                   Position == "Scoutmaster" ~ "SM",
+                                   Position == "Committee Chair" ~ "CC",
+                                   Position == "Chartered Organization Rep." ~ "COR")) |>
+  mutate(k_email = str_c(Unit, " ", posabbr, " ", First_Name, " ", Last_Name, " <", Email_Address, ">,")) |>
+  filter(!is.na(posabbr)) |>
+  mutate(posabbr = case_when(posabbr == "CM" ~ "UL",
+                             posabbr == "Advisor" ~ "UL",
+                             posabbr == "SM" ~ "UL",
+                             TRUE ~ posabbr))|>
+  select(Unit,
+         Charter_Org,
+         posabbr,
+         k_email)
+
+utr <- filter(training, !is.na(Unit))
+
+k2 <- key3 |>
+  group_by(Unit, Charter_Org) |>
+  pivot_wider(names_from = posabbr, values_from = k_email)
+
+k4 <- k2 |>
+  mutate(km = case_when(Unit == "Pack 0044 F"  ~ str_c(CC,COR),            # No cubmaster
+                        Unit == "Troop 0052 G" ~ str_c(CC,COR),            # no scoutmaster
+                        Unit == "Pack 0193 F"  ~ str_c(UL,COR),            # no committee chair
+                        Unit == "Troop 0850 B" ~ str_c(UL,CC,COR[1],COR[2]),  # two CORs
+                        .default = str_c(UL,CC,COR)))
+
+str(k4)
