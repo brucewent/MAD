@@ -31,6 +31,7 @@ poslist <- c("Cubmaster",
              "Unit Scouter Reserve",
              "Committee Chair",
              "Committee Member",
+             "Pack Trainer",
              "Chartered Organization Rep.",
              "District Commissioner",
              "Asst. District Commissioner",
@@ -45,29 +46,21 @@ poslist <- c("Cubmaster",
 
 # read the Trained Leaders Status data (CSV Details)
 
-position <- read_csv('data/TrainedLeader_Mercer_Area_District 2024-11-19.csv',
+position <- read_csv('data/TrainedLeader_Mercer_Area_District 2024-12-17.csv',
                      skip=8,
                      col_names=TRUE,
                      col_types=list(MemberID=col_integer(),
-                                    "Direct Contact Leader"=col_factor(),
+                                    "Direct_Contact_Leader"=col_factor(),
                                     Trained=col_factor(),
-                                    "Registration Expiration Date"=
+                                    "Registration_Expiration_Date"=
                                       col_date(format = "%m/%d/%Y"))) |>
   mutate(posfact = fct(Position, levels = poslist)) |>
-  select(-c("Position", "Service Area", "Sub-District")) |>
-  rename(Gender_Accepted = "Gender Accepted",
-         Charter_Org = "Chartered Org Name",
-         First_Name = "First Name",
-         Middle_Name = "Middle Name",
-         Last_Name = "Last Name",
+  select(-c("Position", "Service_Area", "Sub_District")) |>
+  rename(Charter_Org = "Chartered_Org_Name",
          Position = posfact,
-         Zip_Code = "Zip Code",
          Member_ID = "MemberID",
-         Direct_Contact = "Direct Contact Leader",
-         Registration_Expiration = "Registration Expiration Date",
-         Incomplete_Mandatory = "Incomplete Mandatory",
-         Incomplete_Classroom = "Incomplete Classroom",
-         Incomplete_Online = "Incomplete Online" ) |>
+         Direct_Contact = "Direct_Contact_Leader",
+         Registration_Expiration = "Registration_Expiration_Date" ) |>
   mutate(Unit_Gender = case_when(!is.na(Gender_Accepted) ~ str_c(Unit, " ", Gender_Accepted),
                                  is.na(Gender_Accepted) ~ Unit)) |>
   select(-c(Unit, Gender_Accepted)) |>
@@ -79,16 +72,39 @@ nrow(filter(position,is.na(Position))) == 0
 
 # Read the YPT Aging Report data (Export to CSV)
 
-protection <- read_csv('data/YPT_Mercer_Area_District 2024-11-19.csv',
+protection <- read_csv('data/YPT_Mercer_Area_District 2024-12-17.csv',
                     skip=7,
                     col_names=TRUE,
-                    col_types=list(Member_ID=col_integer(),
-                                   Status=col_factor(),
-                                   Effective_Through=col_date(format="%m/%d/%Y"),
-                                   Y01_Completed=col_date(format="%m/%d/%Y"),
-                                   Y01_Expires=col_date(format="%m/%d/%Y"),
-                                   Registration_Date=col_date(format="%m/%d/%Y"))) |>
-  rename(District = "..District")
+                    col_types=list(memberid=col_integer(),
+                                   isyptcurrent2=col_factor(),
+                                   yptexpirationdatec=col_date(format="%m/%d/%Y"),
+                                   y01completiondatec=col_date(format="%m/%d/%Y"),
+                                   y01expirationdatec=col_date(format="%m/%d/%Y"),
+                                   registrationdatec=col_date(format="%m/%d/%Y"))) |>
+  rename("District" = "..district",
+         "Program" = "unittype",
+         "Unit_Number" = "unitnumber",
+         "Gender_Accepted" = "genderaccepted",
+         "Chartered_Org" = "chartedorganization",
+         "First_Name" = "firstname",
+         "Middle_Name" = "middlename",
+         "Last_Name" = "lastname",
+         "Member_ID" = "memberid",
+         "Position" = "positionname",
+         "YPT_Current" = "isyptcurrent2",
+         "Effective_Through" = "yptexpirationdatec",
+         "Youth_Protection_Code" = "y01coursecode",
+         "Y01_Completed" = "y01completiondatec",
+         "Y01_Expires" = "y01expirationdatec",
+         "Street_Address" = "streetaddress",
+         "City" = "city",
+         "State" = "statecode",
+         "Zip" = "zip",
+         "Email_Address" = "emailaddress",
+         "Phone_Number" = "phonenumber",
+         "Registration_Date" = "registrationdatec",
+         "Expiry_Date" = "cregistrationexpirydate",
+         "Online_Courses" = "stronlinecourses" )
 
 # Create a list of distinct active leaders from the YPT data
 # leader is the enhanced version of YPT
@@ -99,7 +115,7 @@ leader <- protection |>
            Middle_Name,
            Last_Name,
            Member_ID,
-           Status,
+           YPT_Current,
            Y01_Completed ,
            Y01_Expires,
            Street_Address,
@@ -108,7 +124,7 @@ leader <- protection |>
            Zip,
            Email_Address,
            Phone_Number) |>
-  rename(Y01_Status = Status) |>
+#  rename(Y01_Status = Status) |>
   arrange(Last_Name, First_Name, Middle_Name, Member_ID)
 
 # Check that member_ID still works as unique identifyer
@@ -148,7 +164,7 @@ training <- position |>
          Incomplete_Mandatory,
          Incomplete_Classroom,
          Incomplete_Online,
-         Y01_Status,
+         YPT_Current,
          Y01_Completed,
          Y01_Expires,
          Street_Address,
@@ -215,13 +231,13 @@ saveWorkbook(wb, "training.xlsx", overwrite=TRUE)
 
 # Format unit stats for HTML output
 
-unit_stats |>
-  select(Charter_Org, Unit, Leaders, Trained, Train_pct,
-         DC_Leaders, DC_Trained, DC_Train_pct) |>
-  arrange(by=Train_pct) |>
-  gt()|>
-  fmt_number(columns=c(Train_pct, DC_Train_pct),
-             decimals = 1)
+# unit_stats |>
+#   select(Charter_Org, Unit, Leaders, Trained, Train_pct,
+#          DC_Leaders, DC_Trained, DC_Train_pct) |>
+#   arrange(by=Train_pct) |>
+#   gt()|>
+#   fmt_number(columns=c(Train_pct, DC_Train_pct),
+#              decimals = 1)
 
 # Report training needs to unit
 
@@ -242,8 +258,6 @@ key3 <- mutate(training,
          posabbr,
          k_email)
 
-utr <- filter(training, !is.na(Unit))
-
 k2 <- key3 |>
   group_by(Unit, Charter_Org) |>
   pivot_wider(names_from = posabbr, values_from = k_email)
@@ -255,4 +269,12 @@ k4 <- k2 |>
                         Unit == "Troop 0850 B" ~ str_c(UL,CC,COR[1],COR[2]),  # two CORs
                         .default = str_c(UL,CC,COR)))
 
+# write emails to CSV
+
+# k4 |> write_csv("emails.csv")
+
+# https://tidyr.tidyverse.org/articles/pivot.html#wider
+
+str(key3)
+str(k2)
 str(k4)
