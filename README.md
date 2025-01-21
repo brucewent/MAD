@@ -6,16 +6,15 @@ Note that the primary input data contains Protected Personal Information (PPI), 
 
 The source file [trained.R](https://github.com/brucewent/MAD/blob/main/trained.R) does the following:
 
-* Load the two source data files 
-* Clean up by removing inactive or duplicate rows
-* Summarize unit leader training counts
-* Write a spreadsheet with three sheets:
-  * Units - the unit summary
-  * Trained - registered positions and position-specific training status
-  * Leader - distinct adult leaders and youth protection training status
-  
-The source file [Training Trends.R](https://github.com/brucewent/MAD/blob/main/Training%20Trends.R) is an earlier effort to track district-wide Trained Leaders & YPT taken from the Training Manager dashboard on a monthly basis.
+-   Load the two source data files
+-   Clean up by removing inactive or duplicate rows
+-   Summarize unit leader training counts
+-   Write a spreadsheet with three sheets:
+    -   Units - the unit summary
+    -   Trained - registered positions and position-specific training status
+    -   Leader - distinct adult leaders and youth protection training status
+-   Write a spreadsheet for each unit containing unit-filtered training records along with Key 3 email addresses
 
-### License	
+### License
 
 See the [LICENSE](https://github.com/brucewent/MAD/blob/main/LICENSE) file for license rights and limitations (MIT).
