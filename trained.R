@@ -35,6 +35,7 @@ poslist <- c("Cubmaster",
              "Chartered Organization Rep.",
              "District Commissioner",
              "Asst. District Commissioner",
+             "Roundtable Commissioner",
              "Unit Commissioner",
              "District Chair",
              "District Vice-Chair",
@@ -46,7 +47,7 @@ poslist <- c("Cubmaster",
 
 # read the Trained Leaders Status data (CSV Details)
 
-position <- read_csv('data/TrainedLeader_Mercer_Area_District 2024-12-17.csv',
+position <- read_csv('data/TrainedLeader_Mercer_Area_District 2025-01-14.csv',
                      skip=8,
                      col_names=TRUE,
                      col_types=list(MemberID=col_integer(),
@@ -72,7 +73,7 @@ nrow(filter(position,is.na(Position))) == 0
 
 # Read the YPT Aging Report data (Export to CSV)
 
-protection <- read_csv('data/YPT_Mercer_Area_District 2024-12-17.csv',
+protection <- read_csv('data/YPT_Mercer_Area_District 2025-01-14.csv',
                     skip=7,
                     col_names=TRUE,
                     col_types=list(memberid=col_integer(),
@@ -229,17 +230,8 @@ addFilter(wb, sheet = 3, row = 1, cols = 1:ncol(leader))
 
 saveWorkbook(wb, "training.xlsx", overwrite=TRUE)
 
-# Format unit stats for HTML output
-
-# unit_stats |>
-#   select(Charter_Org, Unit, Leaders, Trained, Train_pct,
-#          DC_Leaders, DC_Trained, DC_Train_pct) |>
-#   arrange(by=Train_pct) |>
-#   gt()|>
-#   fmt_number(columns=c(Train_pct, DC_Train_pct),
-#              decimals = 1)
-
-# Report training needs to unit
+## Report training needs to unit
+# format key 3 email addresses
 
 key3 <- mutate(training,
                posabbr = case_when(Position == "Cubmaster" ~ "CM",
@@ -247,7 +239,7 @@ key3 <- mutate(training,
                                    Position == "Scoutmaster" ~ "SM",
                                    Position == "Committee Chair" ~ "CC",
                                    Position == "Chartered Organization Rep." ~ "COR")) |>
-  mutate(k_email = str_c(Unit, " ", posabbr, " ", First_Name, " ", Last_Name, " <", Email_Address, ">,")) |>
+  mutate(key3_email = str_c(Unit, " ", posabbr, " ", First_Name, " ", Last_Name, " <", Email_Address, ">,")) |>
   filter(!is.na(posabbr)) |>
   mutate(posabbr = case_when(posabbr == "CM" ~ "UL",
                              posabbr == "Advisor" ~ "UL",
@@ -256,25 +248,40 @@ key3 <- mutate(training,
   select(Unit,
          Charter_Org,
          posabbr,
-         k_email)
+         key3_email)
 
-k2 <- key3 |>
-  group_by(Unit, Charter_Org) |>
-  pivot_wider(names_from = posabbr, values_from = k_email)
+# Format unit-filtered training status spreadsheets
 
-k4 <- k2 |>
-  mutate(km = case_when(Unit == "Pack 0044 F"  ~ str_c(CC,COR),            # No cubmaster
-                        Unit == "Troop 0052 G" ~ str_c(CC,COR),            # no scoutmaster
-                        Unit == "Pack 0193 F"  ~ str_c(UL,COR),            # no committee chair
-                        Unit == "Troop 0850 B" ~ str_c(UL,CC,COR[1],COR[2]),  # two CORs
-                        .default = str_c(UL,CC,COR)))
+for (unit in unit_stats[["Unit"]]) {
 
-# write emails to CSV
+  ts_rec <- training |>
+    filter(Unit == unit) |>
+    select(First_Name,
+           Middle_Name,
+           Last_Name,
+           Position,
+           Direct_Contact,
+           Trained,
+           Registration_Expiration,
+           Incomplete_Mandatory,
+           Incomplete_Classroom,
+           Incomplete_Online,
+           YPT_Current,
+           Y01_Completed,
+           Y01_Expires)
 
-# k4 |> write_csv("emails.csv")
+  ts_em <- key3 |>
+    filter(Unit == unit)
 
-# https://tidyr.tidyverse.org/articles/pivot.html#wider
+  ts <- createWorkbook()
 
-str(key3)
-str(k2)
-str(k4)
+  addWorksheet(ts, "Training Status")
+  writeData(ts, "Training Status", ts_rec)
+  freezePane(ts, sheet = 1, firstRow = TRUE)
+  addFilter(ts, sheet = 1, row = 1, cols = 1:ncol(ts_rec))
+
+  addWorksheet(ts, "Key 3 Emails")
+  writeData(ts, "Key 3 Emails", ts_em)
+
+  saveWorkbook(ts, str_c("out/", unit, " training.xlsx"), overwrite=TRUE)
+}
