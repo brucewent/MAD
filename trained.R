@@ -32,6 +32,7 @@ poslist <- c("Cubmaster",
              "Committee Chair",
              "Committee Member",
              "Pack Trainer",
+             "New Member Coordinator",
              "Chartered Organization Rep.",
              "District Commissioner",
              "Asst. District Commissioner",
@@ -41,7 +42,6 @@ poslist <- c("Cubmaster",
              "District Vice-Chair",
              "District Member-at-Large",
              "Merit Badge Counselor",
-             "New Member Coordinator",
              "Nova Counselor",
              "Supernova Mentor")
 
@@ -229,6 +229,7 @@ freezePane(wb, sheet = 3, firstRow = TRUE)
 addFilter(wb, sheet = 3, row = 1, cols = 1:ncol(leader))
 
 saveWorkbook(wb, "training.xlsx", overwrite=TRUE)
+rm(wb)
 
 ## Report training needs to unit
 # format key 3 email addresses
@@ -239,16 +240,11 @@ key3 <- mutate(training,
                                    Position == "Scoutmaster" ~ "SM",
                                    Position == "Committee Chair" ~ "CC",
                                    Position == "Chartered Organization Rep." ~ "COR")) |>
-  mutate(key3_email = str_c(Unit, " ", posabbr, " ", First_Name, " ", Last_Name, " <", Email_Address, ">,")) |>
   filter(!is.na(posabbr)) |>
-  mutate(posabbr = case_when(posabbr == "CM" ~ "UL",
-                             posabbr == "Advisor" ~ "UL",
-                             posabbr == "SM" ~ "UL",
-                             TRUE ~ posabbr))|>
+  mutate(email = str_c(Unit, " ", posabbr, " ", First_Name, " ", Last_Name, " <", Email_Address, ">,")) |>
   select(Unit,
          Charter_Org,
-         posabbr,
-         key3_email)
+         email)
 
 # Format unit-filtered training status spreadsheets
 
@@ -277,11 +273,19 @@ for (unit in unit_stats[["Unit"]]) {
 
   addWorksheet(ts, "Training Status")
   writeData(ts, "Training Status", ts_rec)
+  setColWidths(ts, sheet = 1, cols = 1:ncol(ts_rec), widths = "auto")
   freezePane(ts, sheet = 1, firstRow = TRUE)
   addFilter(ts, sheet = 1, row = 1, cols = 1:ncol(ts_rec))
 
   addWorksheet(ts, "Key 3 Emails")
   writeData(ts, "Key 3 Emails", ts_em)
+  setColWidths(ts, sheet = 2, cols = 1:ncol(ts_em), widths = "auto")
 
   saveWorkbook(ts, str_c("out/", unit, " training.xlsx"), overwrite=TRUE)
 }
+
+rm(unit, ts, ts_rec, ts_em)
+
+
+library(NCmisc)
+list.functions.in.file(rstudioapi::getSourceEditorContext()$path, alphabetic = TRUE)
