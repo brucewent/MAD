@@ -1,6 +1,6 @@
 ## MAD
 
-The [Mercer Area District](https://www.wccscouting.org/mercer-area) of [Scouting America](https://www.scouting.org/) (MAD) serves Mercer County New Jersey along with several adjacent towns. This project is a volunteer effort to analyze scout leader training records usin R.
+The [Mercer Area District](https://www.wccscouting.org/mercer-area) of [Scouting America](https://www.scouting.org/) (MAD) serves Mercer County New Jersey along with several adjacent towns. This project is a volunteer effort to analyze scout leader training records using R.
 
 Note that the primary input data contains Protected Personal Information (PPI), so it is not tracked here. You may be authorized to download your own district or council-wide data from the My Scouting portal's [Training Manager](https://my.scouting.org/).
 
@@ -13,7 +13,7 @@ The source file [trained.R](https://github.com/brucewent/MAD/blob/main/trained.R
     -   Units - the unit summary
     -   Trained - registered positions and position-specific training status
     -   Leader - distinct adult leaders and youth protection training status
--   Write a spreadsheet for each unit containing unit-filtered training records along with Key 3 email addresses
+-   For each unit, write a spreadsheet containing unit-filtered training records (excluding PPI) along with the unit Key 3 email addresses
 
 ### License
 
