@@ -2,10 +2,21 @@
 # trained.R
 # See https://github.com/brucewent/MAD/
 
-library(tidyverse)
-library(openxlsx)
-library(janitor)
-library(gt)
+data_date <- "2025-03-03"
+
+# install.packages("tidyverse")
+# install.packages("openxlsx")
+# install.packages("janitor")
+
+# library(tidyverse) # next section includes minimal tidyverse packages
+
+library(readr)
+library(stringr)
+library(forcats)
+library(dplyr)
+
+library(openxlsx) # createWorkbook etc
+library(janitor) # tabyl
 
 # List of adult leadership positions in logical order
 
@@ -47,7 +58,8 @@ poslist <- c("Cubmaster",
 
 # read the Trained Leaders Status data (CSV Details)
 
-position <- read_csv('data/TrainedLeader_Mercer_Area_District 2025-01-14.csv',
+position <- read_csv(str_c('data/TrainedLeader_Mercer_Area_District ',
+                           data_date, '.csv'),
                      skip=8,
                      col_names=TRUE,
                      col_types=list(MemberID=col_integer(),
@@ -73,12 +85,13 @@ nrow(filter(position,is.na(Position))) == 0
 
 # Read the YPT Aging Report data (Export to CSV)
 
-protection <- read_csv('data/YPT_Mercer_Area_District 2025-01-14.csv',
-                    skip=7,
-                    col_names=TRUE,
-                    col_types=list(memberid=col_integer(),
-                                   isyptcurrent2=col_factor(),
-                                   yptexpirationdatec=col_date(format="%m/%d/%Y"),
+protection <- read_csv(str_c('data/YPT_Mercer_Area_District ',
+                             data_date, '.csv'),
+                       skip=7,
+                       col_names=TRUE,
+                       col_types=list(memberid=col_integer(),
+                                      isyptcurrent2=col_factor(),
+                                      yptexpirationdatec=col_date(format="%m/%d/%Y"),
                                    y01completiondatec=col_date(format="%m/%d/%Y"),
                                    y01expirationdatec=col_date(format="%m/%d/%Y"),
                                    registrationdatec=col_date(format="%m/%d/%Y"))) |>
@@ -286,6 +299,6 @@ for (unit in unit_stats[["Unit"]]) {
 
 rm(unit, ts, ts_rec, ts_em)
 
-
-library(NCmisc)
-list.functions.in.file(rstudioapi::getSourceEditorContext()$path, alphabetic = TRUE)
+# see what funtions are loaded
+#library(NCmisc)
+#list.functions.in.file(rstudioapi::getSourceEditorContext()$path, alphabetic = TRUE)
