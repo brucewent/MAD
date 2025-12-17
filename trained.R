@@ -2,7 +2,7 @@
 # trained.R
 # See https://github.com/brucewent/MAD/
 
-data_date <- "2025-03-03"
+data_date <- "2025-12-16"
 
 # install.packages("tidyverse")
 # install.packages("openxlsx")
@@ -52,13 +52,14 @@ poslist <- c("Cubmaster",
              "District Chair",
              "District Vice-Chair",
              "District Member-at-Large",
+             "District Committee Member",
              "Merit Badge Counselor",
              "Nova Counselor",
              "Supernova Mentor")
 
 # read the Trained Leaders Status data (CSV Details)
 
-position <- read_csv(str_c('data/TrainedLeader_Mercer_Area_District ',
+position <- read_csv(str_c('data/TrainedLeader_Mercer_Area_District_15 ',
                            data_date, '.csv'),
                      skip=8,
                      col_names=TRUE,
@@ -85,7 +86,7 @@ nrow(filter(position,is.na(Position))) == 0
 
 # Read the YPT Aging Report data (Export to CSV)
 
-protection <- read_csv(str_c('data/YPT_Mercer_Area_District ',
+protection <- read_csv(str_c('data/SYT_Mercer_Area_District_15 ',
                              data_date, '.csv'),
                        skip=7,
                        col_names=TRUE,
@@ -299,6 +300,3 @@ for (unit in unit_stats[["Unit"]]) {
 
 rm(unit, ts, ts_rec, ts_em)
 
-# see what funtions are loaded
-#library(NCmisc)
-#list.functions.in.file(rstudioapi::getSourceEditorContext()$path, alphabetic = TRUE)
