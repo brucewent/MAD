@@ -6,7 +6,7 @@ Note that the primary input data contains Protected Personal Information (PPI), 
 
 The source file [trained.R](https://github.com/brucewent/MAD/blob/main/trained.R) does the following:
 
--   Load the two source data files (Trained Leaders Status, YPT detailed CSVs)
+-   Load the two source data files (Trained Leaders, Safeguarding Youth report detailed CSVs)
 -   Clean up by removing inactive or duplicate rows
 -   Summarize unit leader training counts
 -   Write a spreadsheet with three sheets:

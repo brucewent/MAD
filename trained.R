@@ -2,7 +2,7 @@
 # trained.R
 # See https://github.com/brucewent/MAD/
 
-data_date <- "2025-12-16"
+data_date <- "2026-03-11"
 
 # install.packages("tidyverse")
 # install.packages("openxlsx")
